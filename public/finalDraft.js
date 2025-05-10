@@ -1,27 +1,161 @@
 let customFont;
 let aiCount = 0;
+let sheepX, sheepY, sheepSize;
+let sheepCount = 0;
+let logTimer = 0;
+let currentLogIndex = -1;
+let isSheepEnabled = true;
+let bgm;
+let clickSE;
 
 // =================== 劇本 ===================
 let intro = [
     "「我們輕易地接受了現實，也許因為我們直覺感到什麼都不是真實的。」\n——博爾赫斯《永生》"
 ];
-let storyTexts = ["1111111", "111111"];
-let act01Content = ["2111111", "211111"];
-let act1_1Content = ["劇情1_1內容", "劇情1_1後續"];
-let act1_2Content = ["劇情1_2內容", "劇情1_2後續"];
-let act02Content = ["act02Content", "act02Content"];
-let act2_1Content = ["劇情2_1內容", "劇情2_1後續"];
-let act2_2Content = ["劇情2_2內容", "劇情2_2後續"];
-let act03Content = ["act03Content", "act03Content"];
-let act3_1Content = ["劇情3_1內容", "劇情3_1後續"];
-let act3_2Content = ["劇情3_2內容", "劇情3_2後續"];
-let act04Content = ["act04Content", "act04Content"];
-let act4_1Content = ["劇情4_1內容", "劇情4_1後續"];
-let act4_2Content = ["劇情4_2內容", "劇情4_2後續"];
+let storyTexts = ["咔、咔咔、咔咔咔。",
+    "我在一片食物香氣中醒來。\n早晨獨有的、帶著清爽溫度的濕氣沁入我的眼簾。",
+    "我的羊結束在廚房的工作，\n卸下鍋具後，它將剛出爐的蜂蜜鬆餅端上，\n我就這樣沐浴在貝多芬的第七號交響曲享用早餐。",
+    "我喜歡此刻恰到好處的溫度、光照、聲音、氣味，\n以及窗外那些如同鮮花的投影，",
+    "我已經不記得參數是自己設定還是使用自動化推薦算的，\n但自從買了羊，每天都過著我嚮往的、如詩的日子。",
+    "我對自然的印象大抵都很美好，\n除了小時候看了一部關於山崩的電影。",
+    "怪當初教育部的環境政策，他們說這個世代的孩子\n「比過往任何人都要了解自然，但也比誰都對世界一無所知」\n於是強迫國小生在音樂課看老掉牙的電影寫心得感想。",
+    "我們從小學就被教授關於地球的知識，\n如果忘記，點開手機隨便查一下也有。",
+    "天動還是地動？海的盡頭有什麼？\n這些謬論以及關於宇宙的所有謎底\n做為基礎科學知識都早已被解開。",
+    "世界與自然之中明明不存在未知，\n那「對自然一無所知」又是在說什麼呢？真是不知所云。",
+    "電影很無趣，\n從頭到尾只講述一群對於地質、氣候、植物學\n都一無所知的人類踏入山中，最後死在突如其來的塌方。",
+    "我問導師為何要播這樣的電影，\n他語氣沒什麼起伏地告訴我：\n「每年都播這部。」",
+    "「但這不可能發生。所有山脈的結構在五十年前的地震已經失序，\n現在存在於那裡的只是屍體堆一樣的殘骸，\n雙腳踏上山路的那刻，人類就會陷落至機器也無法探明的深度，\n沒有人還會明知故犯地去被山殺死。」",
+    "「不，這每年發生。」\n老師說。",
+    "「為什麼？他們看了這部電影後模仿嗎？\n這麼一來不是更不該播嗎？」",
+    "「不論如何，你們必須了解山是什麼，\n這麼一來要是哪天遇到了山，\n不管是生存還是毀滅，才知道該怎麼選擇。」",
+    "我想我應該懂了，於是我在電影心得中寫：",
+    "正常人不會步入已知的毀滅，\n這部電影警惕我們未來不要成為那樣的大人。",
+    "在那之後我似乎做過很多次山崩的夢，\n厭倦過時恐怖的虛構威脅，\n不記得又過了五年還是十年，\n那讓人心臟驟停的泥石之雨才從我的腦海中消失。",
+    "我摸了摸我的羊，\n它鼻腔處的接口噴出一股溫熱的氣息，\n後頭的散熱風扇轉動，像是滿足的呼嚕聲。"];
+let act01Content = ["點開郵件，是科技、人文與道德思維的期中預警。",
+    "唉⋯⋯",
+    "我不由得感到疲倦。",
+    "這種素養通識教的都是一些理所當然的東西。",
+    "比如「不應該濫用科技」、「要遵守法律規範」之類的。",
+    "我想連小學生也知道該怎麼回答。",
+    "我只去上了兩堂課，之後就沒有再去過，\n既不關心課程的內容，也不認為能從中學到什麼東西。",
+    "我只是需要這堂課的學分而已，\n偏偏，每週都要繳交一份作業。",
+    "作業並不困難，\n然而或許是因為如此，我更提不起勁了。",
+    "這種程度的東西，是不是我做的很重要嗎？",
+    "累積了好幾週的作業淹沒了我的視野，\n不論如何，我必須在今天之內把這些作業處理掉。",
+    "請以滑鼠拖動物件，將垃圾分類，\n或是直接使用AI完成。"];
+let act1_1Content = ["多虧了電子助理，日程直接空出了好幾小時。",
+    "利用這段時間，我讀了一本小說、看了幾場電影，",
+    "原本漆黑一片的腦袋不知不覺灌滿靈感。",
+    "我沉浸在興奮感之中，\n感覺現在似乎能做到很了不起的事，我再度打開筆電。"];
+let act1_2Content = ["不知不覺，好幾個小時過去了。",
+    "空空如也的畫面讓我稍微輕鬆了些，\n至少這樣能夠及格吧？",
+    "不過，工作帶來的滿足感過於微小，\n更多的是湧上心頭的疲倦與煩躁感。",
+    "我不明白這是否是一件有意義的事情，\n只能懷抱著虛無感，繼續處理其他事務。"];
+let act02Content = ["又到了寫論文的時間了。",
+    "我嘆了口氣，有些手足無措。",
+    "雖然花了很多時間去蒐集與構思內容，\n但總感覺自己能寫出來的東西也就那樣。",
+    "我朋友用Chat GBT生成的論文，\n不僅看起來意外專業，還意外取得了高分。",
+    "或許交給AI做會比較好。\n我需要消化才能使用的專業知識，它生來就具備，\n可以輕鬆做得比我好，優秀的東西總是比較有價值。",
+    "慢慢編織出文字的過程像一步步攀登高山，\n終點遙不可及，讓人望而生畏。",
+    "而且這是我想做的題目，\n即使由AI生成，我也能藉此得到我想要的解答。",
+    "請輸入文字以撰寫論文，直到內容填滿空格，\n或是直接使用AI完成。"];
+let act2_1Content = ["我順利完成了論文進度，十分鐘後得到沒有問題的答覆。",
+    "不愧是人工智慧。\n從前為人詬病「提供錯誤解答」亂回的狀況，在數十年的技術迭代後，\n現今版本Chat GBT吐出的每個字詞都是絕對正解。",
+    "我不禁想著：\n如果全世界的人都用同一套工具去思考，\n知識的那個池塘裡，還剩下什麼呢？",
+    "好在這還不是我需要憂慮的事，\n得再過個一百或兩百年，所有的問句才會被解答完畢。",
+    "如果真理真的存在，未來的人類肯定是距離它最近的物種。",
+    "寫論文這種事情，到時候也該廢除了。"];
+let act2_2Content = ["我勉勉強強完成了論文進度，三分鐘後得到教授的修正建議。",
+    "回復得過於快速，雖然挑不出錯誤，\n但我猜他可能是用人工智慧回復的。",
+    "我不感到奇怪，畢竟現在大學生太多了。",
+    "人類因為科技而變得無所不能後，\n終於有餘力在茶餘飯後伸出手去彌補過去視而不見的匱乏不公。",
+    "所有角落都被信號給覆蓋，\n過去無法學習的第三世界居民因而得到教育機會，\n各種教育機構的在讀人口激增，",
+    "教授看不了一百多篇論文是再正常不過的事情，\n況且人工智慧的回覆也挑不出錯。",
+    "流動的資訊不勝枚舉，\n沒有被親自讀取的言語與電波一起，\n成為徘徊於城市高空的幽靈。"];
+let act03Content = [    "好煩。",
+    "實習地點的同事傳訊息來了，多半是一些無理取鬧的內容。",
+    "明明不是上班時間，還隨意指使別人，真是過分。",
+    "語氣也毫不留情，怎麼想都不是拜託人的態度。",
+    "多半是在講上次學弟放錯檔案那件事情，但又不是我的錯，",
+    "我憑什麼要當老闆的出氣筒，\n還得先低聲下氣道歉？",
+    "想到心情就很差，不想用腦處理這些爛事。",
+    "話說，電子助理有代回訊息機能吧？\n說是「幫人解決人際關係產生的內耗與情緒負擔」。",
+    "之前新聞有報，\n因為這個功能，職場心理疾病的罹患率大幅降低。",
+    "請輸入訊息答覆，或是直接由AI代為處理。"];
+let act3_1Content = ["我把聊天室的控制權交給AI。",
+    "不到幾秒，它就以得體的回應推進對話，將尖銳的話語包裝得當。",
+    "現在的話，即使看著訊息也不會一肚子火，\n明明是同一句話，換個說法就讓人意外的能接受。",
+    "別人缺乏的禮貌與社會化程度都由AI補上了，\n這樣不是很好嗎？",
+    "為了感受這份溫柔，犧牲與人親自溝通的機會。",
+    "想起來，我連那個同事的臉也沒有見過。\n這個時代多半都是遠距辦公，\n無法與他本人會面、有所交流，也是在所難免的事情。"];
+let act3_2Content = ["我還是自己回覆了。",
+    "讀完訊息後，我花了好幾分鐘的時間才平息怒火，\n如果當初沒有看這些東西肯定比較輕鬆。",
+    "儘管不想與這些人扯上關係，\n但我似乎又摸透上級的喜好一點了。",
+    "或許算是不錯的收穫吧\n——這麼想的同時，手機傳來新的回覆。",
+    "『你有在好好反省嗎？\n在今晚之前給我檢討完，總結你自己的錯誤。』",
+    "又罵？不是吧？為什麼？",
+    "人與人之間，就算產生了聯繫，結果也不盡理想。",
+    "這樣的事情一再發生，果然會讓人感到疲倦，\n或許哪天我會變得根本不想和任何人說話。"];
+let act04Content = ["悶在家裡太久，隨便誰都好，想和人說說話了。",
+    "雖然我很想來場轟轟烈烈的戀愛，\n但現在與人實體接觸的機會不多，",
+    "沒什麼機會認識新朋友，更別提談感情了。",
+    "不過，說到談戀愛，\n除了上網找陌生人之外，其實還有其他選擇。",
+    "我主要是想滿足感情需求，\n這麼說來，AI某種程度上聊起來更舒服。",
+    "理想的性格、樣貌、經歷……\n只要我設定完畢，AI可以扮演任何角色，包含我的夢中情人。",
+    "畢竟交友網站上奇形怪狀的人很多，\n聊過發現其實只是想約跑步的人也不在少數。",
+    "雖然想找人對話，\n但打開話題也很麻煩，不知道該說什麼好。",
+    "請選擇打開『Tiber』尋找伴侶，\n或是打開『即即我我』與AI對話。"];
+let act4_1Content = ["不知不覺，就在唧唧我我課金了，",
+    "不愧是我自己設定好的性格，和小羊說起話來就是輕鬆。",
+    "美中不足的是，小羊偶爾會壞掉，說出很奇怪的話。",
+    "似乎也會忘記我們先前聊過的內容。",
+    "雖然開心，但用到某個程度後，反而感覺像被潑了一桶冷水。",
+    "希望官方能快點修好這些問題吧。"];
+let act4_2Content = ["『配對失敗、配對失敗、配對失敗』",
+    "來回幾趟下來，我深深感到挫折。",
+    "我有那麼差勁嗎？",
+    "不過話說回來，這個軟體上遇到的人大多都很奇怪。",
+    "或許沒配對上是件好事。",
+    "果然還是想找人說說話，下次有空，試著出門走走好了。"];
 let endContent = [];
-let end1Content = ["重度使用內容", "重度使用後續"];
-let end2Content = ["輕度使用內容", "輕度使用後續"];
-let end3Content = ["中度使用內容", "中度使用後續"];
+let end1Content = ["我成為了一個偉大的學者。",
+    "儘管我不一定知曉一切，但所謂的知識與技術，\n對當今的人類來說，沒有死死緊握的必要。",
+    "登上八十億人共同鑄造的階梯，\n天上的星星雖然垂手可得，然而這份成功絕對不可說是偶然。",
+    "畢竟知道怎麼掌握工具也是一門技巧。",
+    "把所有知識與技術關在一個什麼都沒有的箱子裡，\n過了多少年都不會有所「創造」。",
+    "我用意識賦予無機的工作意義，人類就是這樣立足於萬物之上的。",
+    "「那麼，有請本屆的獲獎者發表感言。\n他解決了長期困擾產業的供應鏈預測難題、\n降低了全球最大農糧企業的訂單誤差率達35%，\n他是世紀的學者、不朽的天才——」",
+    "如碎石落下的掌聲中，呼喊我名字的音節變得模糊。"];
+let end2Content = ["我似乎是世界上僅存的人類。",
+    "這麼說可能不太恰當，\n街上走動的那些毫無疑問也是人類，\n但只剩下我一個保留著原始的肉體。",
+    "大部分的人選擇植入機械器官，用訊息單位取代身體上的神經元。",
+    "不知是出於固執、怯弱還是其他原因，\n總之，我一直都挺排斥那些的。",
+    "儘管被告知現在的肉體難以維護，壽命不會超過一百年，\n還是早日替換成機器比較好……",
+    "面向人類軀體的醫療單位也在減少，\n等到疾病纏身的老年，無處投醫也說不定。",
+    "聽起來真是殘酷。\n但或許因為我還年輕，我並不感到恐懼，\n只覺得這具肉體的舉手投足都無比美好，充滿生命力。",
+    "我肯定也是因為喜歡這種獨屬於人類的活力，\n當初才不把爛攤子丟給AI。",
+    "我穿過一條又一條的街道，\n微風與陽光在我的皮膚上輕輕綻放，\n我是世界上唯一一個還能真正感受到這些的人。",
+    "然後，在下一個路口，我與「它」相遇了。",
+    "「它」有著隨處可見的機械身體。\n與鮮活的我相比，這樣無機的存在除了意志以外剩下什麼呢？",
+    "但我仍然情不自禁地被「她」的言談給吸引，\n我想我肯定對「她」的意志一見鍾情了。",
+    "這樣庸俗而純粹的愛情故事，隨處可見地發生著。"];
+let end3Content = ["我什麼都沒有成為，就這樣平平淡淡地度日。",
+    "享受科技的便利，過著舒適的生活。",
+    "時而憂慮、時而釋然。\n畢竟思考與感受不會因為機器協作而停止，\n所以我想我的生活還是挺充實的。",
+    "雖然身體有了一些變化。",
+    "上周，我換上機械義肢，\n那能幫助我更好地完成工作。",
+    "機械手臂以難以想像的速度動作著，\n因為已經設定好行為模式與指令，所以只要等待就行。",
+    "我盯著電腦螢幕發愣，稍微有點寂寞。",
+    "這時，羊輕輕磨蹭了我的腳一下。",
+    "像是察覺到我低落的情緒，它可愛的舉動十分貼心——\n不，智慧助理真的具備觀察使用者情緒的機能，\n所以它確實能透過我的肌肉組成、心跳與脈搏理解我的孤獨。",
+    "不論是疲倦還是悲傷，\n羊都會注視著我、為了我行動、長久陪伴我，\n我深深依賴著它。",
+    "把我們之間的關係稱作是家人也不為過。"];
+let end4Content = ["在讓人忘卻一切的細雨中，我帶上了我的一切。",
+    "待在家裡，不論是張開眼睛還是閉上眼睛，\n都什麼也感受不到，什麼也擁有不了。",
+    "我回想起早已忘卻的電影。\n滲了水的褐色砂土會變得柔軟，\n夕陽的色澤仿佛在鮮血之中摻入蛋黃與牛奶，細膩而溫潤。",
+    "群山的翠色比資訊的黑洞更加深沉，\n輕輕一躺，便能墜入棉絮般的床榻，安然入眠吧。",
+    "我想要去那裡做一個真實的、溫柔的夢。"];
 
 // =================== 狀態變數 ===================
 let displayingIntro = true;
@@ -136,9 +270,13 @@ let buttonNextW, buttonNextH, buttonSendW, buttonSendH, buttonAiXW4, buttonAiXH4
 let buttonNextX, buttonNextY, buttonSendX4, buttonSendY4,
     buttonAiX4, buttonAiY4, buttonXX4, buttonXY4,
     buttonYesX, buttonYesY, buttonNoX, buttonNoY;
+let imgSheep;
+let imgLogs = [];
 
 
 function preload() {
+    bgm = loadSound('music/bgmusic.mp3');
+    clickSE = loadSound('music/key.mp3');
 
     customFont = loadFont('Cubic_11.woff');
     bgImage = loadImage('images/background.png');
@@ -201,6 +339,15 @@ function preload() {
     imgEnd1_2 = loadImage("images/end1_2.png");
     imgEnd2 = loadImage("images/end2.png");
     imgEnd3 = loadImage("images/end3.png");
+
+    //羊
+    imgSheep = loadImage("images/speep.PNG");
+    for (let i = 1; i <= 10; i++) {
+        imgLogs[i - 1] = loadImage(`images/log${i}.PNG`);
+    }
+    sheepX = 720;
+    sheepY = 360;
+    sheepSize = 200;
 }
 
 
@@ -411,7 +558,6 @@ function setup() {
     buttonYesY = 505;
     buttonNoX = 680;
     buttonNoY = 505;
-
     buttonStart4 = createButton("next");
     buttonEnd = createButton("next");
     buttonEnd_ = createButton("next");
@@ -549,7 +695,7 @@ function setup() {
 
 // =================== 主程式的draw() ===================
 function draw() {
-    // 只要不是任務內就統一隱藏按鈕
+    // 只要不是任務34就統一隱藏按鈕
     if (!displayingTask3) {
         hideAllTask3Buttons();
     }
@@ -563,12 +709,15 @@ function draw() {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayStory();
+        startWithFadeIn();
+        handleSheep();
     } else if (displayingIntro01) {
         displayIntro01();
     } else if (displayingAct01) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct01();
+        handleSheep();
     } else if (displayingTask1) {
         buttonTask1.show();
         displayTask1();
@@ -577,11 +726,13 @@ function draw() {
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         buttonTask1.hide();
         displayAct1_1();
+        handleSheep();
     } else if (displayingAct1_2) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         buttonTask1.hide();
         displayAct1_2();
+        handleSheep();
     } else if (displayingIntro02) {
         buttonTask1.hide();
         displayIntro02();
@@ -590,23 +741,27 @@ function draw() {
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         buttonTask1.hide();
         displayAct02();
+        handleSheep();
     } else if (displayingTask2) {
         drawTask2();
     } else if (displayingAct2_1) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct2_1();
+        handleSheep();
     } else if (displayingAct2_2) {
         console.log("2-2");
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct2_2();
+        handleSheep();
     } else if (displayingIntro03) {
         displayIntro03();
     } else if (displayingAct03) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct03();
+        handleSheep();
         // ★ 一旦 Act03 結束後，mousePressed() 裡會令 displayingTask3 = true
     } else if (displayingTask3) {
         drawTask3();
@@ -614,26 +769,31 @@ function draw() {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct3_1();
+        handleSheep();
     } else if (displayingAct3_2) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct3_2();
+        handleSheep();
     } else if (displayingIntro04) {
         displayIntro04();
     } else if (displayingAct04) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct04();
+        handleSheep();
     } else if (displayingTask4) {
         drawTask4();
     } else if (displayingAct4_1) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct4_1();
+        handleSheep();
     } else if (displayingAct4_2) {
         image(bgImage, 0, 0, width, height);
         image(showBoy(), boyPosXmain, boyPosYmain, boyWidth, boyHeight);
         displayAct4_2();
+        handleSheep();
     } else if (displayingEnd) {
         displayEnd();
     }
@@ -643,12 +803,30 @@ function draw() {
 
 // =================== 滑鼠事件 ===================
 function mousePressed() {
+    clickSE.play();
+    if (isSheepEnabled) {
+        // 檢查是否點擊了羊的範圍
+        if (mouseX > sheepX && mouseX < sheepX + sheepSize &&
+            mouseY > sheepY && mouseY < sheepY + sheepSize) {
+            if (sheepCount < 10) { // 添加條件限制
+                sheepCount++;
+                console.log(`Sheep clicked! Current count: ${sheepCount}`);
+    
+                // 顯示 log
+                currentLogIndex = sheepCount;
+                logTimer = millis();
+            } else {
+                console.log("Sheep count has reached the limit of 10.");
+            }
+        }
+    }    
     if (displayingIntro) {
         displayingIntro = false;
         displayingStory = true;
         timer = 0;
 
     } else if (displayingStory) {
+        isSheepEnabled = true;
         resetText();
         //所有劇情使用的邏輯都是播完>>設下一個階段為true
         if (currentTextIndex >= storyTexts.length) {
@@ -658,11 +836,14 @@ function mousePressed() {
         }
 
     } else if (displayingIntro01) {
+        isSheepEnabled = false;
         resetText();
         displayingIntro01 = false;
         displayingAct01 = true;
+        currentTextIndex = 0;
 
     } else if (displayingAct01) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act01Content.length) {
             currentTextIndex = 0;
@@ -671,6 +852,7 @@ function mousePressed() {
         }
 
     } else if (displayingTask1) {
+        isSheepEnabled = false;
         for (let trash of trashItems) {
             if (trash.isMouseOver()) {
                 draggingItem = trash;
@@ -679,6 +861,7 @@ function mousePressed() {
         }
 
     } else if (displayingAct1_1) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act1_1Content.length) {
             currentTextIndex = 0;
@@ -687,6 +870,7 @@ function mousePressed() {
         }
 
     } else if (displayingAct1_2) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act1_2Content.length) {
             currentTextIndex = 0;
@@ -695,20 +879,26 @@ function mousePressed() {
         }
 
     } else if (displayingIntro02) {
+        isSheepEnabled = false;
+
         resetText();
         displayingIntro02 = false;
         displayingAct02 = true;
+        currentTextIndex = 0;
 
     } else if (displayingAct02) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act02Content.length) {
             currentTextIndex = 0;
             displayingAct02 = false;
             displayingTask2 = true;
+            isSheepEnabled = false;
             endTask2Button.show();
         }
 
     } else if (displayingAct2_1) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act2_1Content.length) {
             currentTextIndex = 0;
@@ -717,6 +907,7 @@ function mousePressed() {
         }
 
     } else if (displayingAct2_2) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act2_2Content.length) {
             currentTextIndex = 0;
@@ -725,18 +916,23 @@ function mousePressed() {
         }
 
     } else if (displayingIntro03) {
+        isSheepEnabled = false;
         resetText();
         displayingIntro03 = false;
         displayingAct03 = true;
+        currentTextIndex = 0;
 
     } else if (displayingAct03) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act03Content.length) {
             currentTextIndex = 0;
             displayingAct03 = false;
             displayingTask3 = true;
+            isSheepEnabled = false;
         }
     } else if (displayingAct3_1) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act3_1Content.length) {
             currentTextIndex = 0;
@@ -745,6 +941,7 @@ function mousePressed() {
         }
 
     } else if (displayingAct3_2) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act3_2Content.length) {
             currentTextIndex = 0;
@@ -753,23 +950,29 @@ function mousePressed() {
         }
 
     } else if (displayingIntro04) {
+        isSheepEnabled = false;
         resetText();
         displayingIntro04 = false;
         displayingAct04 = true;
+        currentTextIndex = 0;
 
     } else if (displayingAct04) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act04Content.length) {
             currentTextIndex = 0;
             displayingAct04 = false;
             displayingTask4 = true;
+            isSheepEnabled = false;
         }
     } else if (displayingAct4_1) {
+        isSheepEnabled = true;
         resetText();
         if (currentTextIndex >= act4_1Content.length) {
             currentTextIndex = 0;
             displayingAct4_1 = false;
             displayingEnd = true;
+            isSheepEnabled = false;
         }
 
     } else if (displayingAct4_2) {
@@ -778,6 +981,7 @@ function mousePressed() {
             currentTextIndex = 0;
             displayingAct4_2 = false;
             displayingEnd = true;
+            isSheepEnabled = false;
         }
     } else if (displayingEnd) {
         resetText();
@@ -907,23 +1111,31 @@ function displayAct04() {
     typewriterEffect(act04Content[currentTextIndex]);
 }
 function displayEnd() {
-    if (aiCount == 4) {
-        image(imgEnd1_1, 0, 0, width, height);
+    if (sheepCount == 10) {
+        background(100)
         drawTextBox();
-        typewriterEffect(end1Content[currentTextIndex]);
-        endContent = end1Content;
-    }
-    else if (aiCount == 0) {
-        image(imgEnd2, 0, 0, width, height);
-        drawTextBox();
-        typewriterEffect(end2Content[currentTextIndex]);
-        endContent = end2Content;
+        typewriterEffect(end4Content[currentTextIndex]);
+        endContent = end4Content;
     }
     else {
-        image(imgEnd3, 0, 0, width, height);
-        drawTextBox();
-        typewriterEffect(end3Content[currentTextIndex]);
-        endContent = end3Content;
+        if (aiCount == 4) {
+            image(imgEnd1_1, 0, 0, width, height);
+            drawTextBox();
+            typewriterEffect(end1Content[currentTextIndex]);
+            endContent = end1Content;
+        }
+        else if (aiCount == 0) {
+            image(imgEnd2, 0, 0, width, height);
+            drawTextBox();
+            typewriterEffect(end2Content[currentTextIndex]);
+            endContent = end2Content;
+        }
+        else {
+            image(imgEnd3, 0, 0, width, height);
+            drawTextBox();
+            typewriterEffect(end3Content[currentTextIndex]);
+            endContent = end3Content;
+        }
     }
 }
 
@@ -948,7 +1160,7 @@ function typewriterEffect(content) {
 function drawText(textContent) {
     fill(255);
     textFont(customFont);
-    textSize(18);
+    textSize(16);
     textAlign(LEFT, TOP);
     text(
         textContent,
@@ -1346,13 +1558,13 @@ function end() {
     clear();
     buttonEnd.hide();
     displayingTask4 = false;
-    displayingAct4_1 = true;
+    displayingAct4_2 = true;
 }
 function end_() {
     clear();
     buttonEnd_.hide();
     displayingTask4 = false;
-    displayingAct4_2 = true;
+    displayingAct4_1 = true;
 }
 function aiChat() {
     clear();
@@ -1390,6 +1602,8 @@ function send4() {
     buttonSend4.hide();
     buttonEnd.show();
     image(showBoy(), boyX - 200, boyY, boyW, boyH);
+    displayingTask4 = false;
+    displayingAct4_1 = true;
 }
 function xChat() {
     clear();
@@ -1526,3 +1740,22 @@ class Trash {
             mouseY > this.y && mouseY < this.y + this.size);
     }
 }
+function handleSheep() {
+    // 畫出羊
+    image(imgSheep, sheepX, sheepY, sheepSize, sheepSize);
+
+    // 顯示 log 圖片（2 秒後自動消失）
+    if (currentLogIndex !== -1 && millis() - logTimer < 3000) {
+        image(imgLogs[currentLogIndex - 1], width / 2 - 200, height / 2 - 100, 400, 200); // 調整圖片大小與位置
+    } else if (currentLogIndex !== -1 && millis() - logTimer >= 2000) {
+        currentLogIndex = -1; // 超時後清除 log
+    }
+}
+function startWithFadeIn() {
+    if (!bgm.isPlaying()) {
+      // 從 0 音量開始，loop 先啟動
+      bgm.setVolume(0);
+      bgm.loop();
+      // 在 3 秒內，volume 緩升到 0.8
+      bgm.fade(0.6, 2);
+    }}
